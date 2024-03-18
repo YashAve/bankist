@@ -1,5 +1,7 @@
 'use strict';
 
+let account;
+
 const account1 = {
   owner: 'Jonas Schmedtmann',
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
@@ -76,5 +78,55 @@ const displayMovements = function (movements) {
   })
 };
 
-displayMovements(account1.movements);
-console.log(elements.containerMovements.innerHTML);
+const usernames = function () {
+  accounts.forEach(function (account) {
+    account.username = account.owner
+      .toLowerCase()
+      .split(" ")
+      .map(value => value.charAt(0)).join("");
+    //console.log(account);
+  });
+};
+
+const balances = function () {
+  elements.labelBalance.textContent = `${account.movements.reduce(function (accumulator, movement, index, array) {
+    return accumulator + movement;
+  })}€`;
+
+  elements.labelSumIn.textContent = `${account.movements
+    .filter(movement => movement > 0)
+    .reduce((accumulator, movement) => accumulator + movement)}€`;
+
+  elements.labelSumOut.textContent = `${account.movements
+    .filter(movement => movement < 0)
+    .reduce((accumulator, movement) => accumulator + movement) * -1}€`;
+
+  elements.labelSumInterest.textContent = `${Math.round(account.movements
+    .filter(movement => movement > 0)
+    .reduce((accumulator, movement) => accumulator + ((movement * account.interestRate) / 100))
+  )}€`;
+};
+
+const login = function () {
+  console.log("login function called");
+  account = accounts.find(credential => credential.username === elements.inputLoginUsername.value
+    && credential.pin === Number(elements.inputLoginPin.value));
+  console.log(account);
+  if (account) {
+    console.log("login successful");
+    elements.labelWelcome.textContent = `Welcome back, ${account.owner.split(" ")[0]}!`;
+    console.log(elements.labelWelcome.textContent);
+    displayMovements(account.movements);
+    balances();
+    elements.containerApp.style.opacity = 100;
+  }
+}
+
+// setup functions
+usernames();
+
+elements.containerApp.style.opacity = 0;
+elements.btnLogin.addEventListener("click", function (event) {
+  event.preventDefault();
+  login();
+});
